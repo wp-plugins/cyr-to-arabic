@@ -1,6 +1,6 @@
 ﻿=== cyr-to-arabic ===
 Contributors: janibek sheryazdan
-Tags: converter, convert, transliteration, translation, translate, translit, plugin, kazakh, cyrillic, arabic, script, multilanguage
+Tags: converter, convert, transliteration, translation, translate, translit, plugin, kazakh, cyrillic, arabic, قازاقشا, script, multilanguage
 Donate link: http://janibek.kz
 Requires at least: 3.0
 Tested up to: 3.1
@@ -34,8 +34,13 @@ Based on the original Cyr-To-Arab plugin by Janibek sheryazdan.
 * 0.2
 == Changelog ==
 
-= 1.0 =
+= 0.1 =
 * Initial release
+= 0.2 =
+* Edit css
+= 0.3 =
+1. Modify the function code.
+2. Fixes minor bugs.
 
 == Screenshots ==
 

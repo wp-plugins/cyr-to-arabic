@@ -1,8 +1,8 @@
 <?php
 /*
 
-Plugin Name: Cyr-To-Arabic
-Plugin URI: http://www.janibek.kz/cyr2arab
+Plugin Name: cyr-to-arabic
+Plugin URI: http://www.janibek.kz/cyr-to-arabic
 Description: Convert text from Kazakh Cyrillic to Arabic script in posts. 2014.1.1, Altai, China.
 Author: Janibek Sheryazdan
 Version: 0.2
@@ -32,6 +32,8 @@ function kk_set_lang()
 // Arabic text left to right order
 function kk_css()
 {
+	$is_css = "cyrl";
+	
 	if ( isset($_REQUEST['ln']) ) {
 		$lang = $_REQUEST['ln'];
 	} elseif ( isset($_COOKIE['lang']) ) {
@@ -44,7 +46,7 @@ function kk_css()
     	// font face and RTL (Right To Left script).
         $is_css = "tote";
     }
-    wp_enqueue_style(  'default',  plugins_url('/'.$is_css.'.css', __FILE__) );
+    wp_enqueue_style(  'default',  plugins_url('/fonts/'.$is_css.'.css', __FILE__) );
 }
 
 function sidebar_widget()
@@ -163,20 +165,21 @@ class kk_convert
 			$ret = '';
 			foreach( $matches as $m ) {
 				$ret .= substr( $text, $mstart, $m[1] - $mstart );
-				if ( preg_match('/[әөүіӘӨҮІ]/u', $m[0]) && !preg_match('/[еэгғкқЕЭГҒКҚ]/u', $m[0]) ) {
+				if ( preg_match('/[әөүіӘӨҮІ]/u', $m[0]) && !preg_match('/[еэгғкқЕЭГҒКҚ]/u', $m[0]) )
+				{
 					$ret .= 'ء'.$m[0];
-					} else {
-						$ret .= $m[0];
-					}
-					$mstart = $m[1] + strlen($m[0]);
+				} else {
+					$ret .= $m[0];
 				}
-				// Convert Text
-				$text =& $ret;
-				foreach( $arb as $k => $v ) {
-					$text = preg_replace( $k, $v, $text );
-				}
-				// Arabic text results
-				return $text;
+				$mstart = $m[1] + strlen($m[0]);
+			}
+			// Convert Text
+			$text =& $ret;
+			foreach( $arb as $k => $v ) {
+				$text = preg_replace( $k, $v, $text );
+			}
+			// Arabic text results
+			return $text;
 		   } else {
 		   	   // if there no need for transliteration, print out unchanged text
 			return $text;
