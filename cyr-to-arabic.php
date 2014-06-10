@@ -46,7 +46,7 @@ function kk_css()
     	// font face and RTL (Right To Left script).
         $is_css = "tote";
     }
-    wp_enqueue_style(  'default',  plugins_url('/fonts/'.$is_css.'.css', __FILE__) );
+    wp_enqueue_style(  'default',  plugins_url('/'.$is_css.'.css', __FILE__) );
 }
 
 function sidebar_widget()
