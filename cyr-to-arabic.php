@@ -5,7 +5,7 @@ Plugin Name: cyr-to-arabic
 Plugin URI: http://www.janibek.kz/cyr-to-arabic
 Description: Convert text from Kazakh Cyrillic to Arabic script in posts. 2014.1.1, Altai, China.
 Author: Janibek Sheryazdan
-Version: 0.3
+Version: 0.4
 Author URI: http://www.janibek.kz
 */
 
@@ -146,6 +146,11 @@ class kk_convert
 		{
 			$lang = $_COOKIE['lang'];
 		}
+		/**if ( $lang == "kk" )
+		{
+			This function kkconvert.php file inside.
+			require_once(dirname(__FILE__)."/kkconvert.php");
+		}**/
 		if ( $lang == "ar" )
 		{
 			// Cyrillic to Arabic
