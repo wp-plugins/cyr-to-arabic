@@ -5,80 +5,35 @@ Plugin Name: cyr-to-arabic
 Plugin URI: http://www.janibek.kz/cyr-to-arabic
 Description: Convert text from Kazakh Cyrillic to Arabic script in posts. 2014.1.1, Altai, China.
 Author: Janibek Sheryazdan
-Version: 0.4
+Version: 0.5
 Author URI: http://www.janibek.kz
 */
 
-add_action('init', 'kk_set_lang');
-add_action('wp_head', 'kk_css');
-add_action('plugins_loaded', 'sidebar_widget');
-add_action('do_convert', 'kk_convert');
-
-// cookie
 function kk_set_lang()
 {
-	$ln = "";
-	$lang = "";
-
-	if ( isset($_REQUEST['ln']) )
-        {
-		$lang = $_REQUEST['ln'];
-		if ( $lang == "kk" || $lang == "ar" )
+	if ( isset($_REQUEST['ln']) && ( $_REQUEST['ln'] == "kk" || $_REQUEST['ln'] == "ar" || $_REQUEST['ln'] == "lat" ) )
 		{
-			setcookie("lang", $lang);
+			setcookie("lang",  $_REQUEST['ln']);
 		}
-	}
 }
-// Arabic text left to right order
+add_action('init', 'kk_set_lang');
+
 function kk_css()
 {
-	$is_css = "cyrl";
-	
 	if ( isset($_REQUEST['ln']) ) {
 		$lang = $_REQUEST['ln'];
 	} elseif ( isset($_COOKIE['lang']) ) {
 		$lang = $_COOKIE['lang'];
 	}
-    if ($lang == "kk") {
-        $is_css = "cyrl";
-    }
     if ($lang == "ar") {
     	// font face and RTL (Right To Left script).
-        $is_css = "tote";
+        wp_enqueue_style(  'tote',  plugins_url('/fonts/tote.css', __FILE__) );
     }
-    wp_enqueue_style(  'default',  plugins_url('/'.$is_css.'.css', __FILE__) );
+    
 }
+add_action('wp_head', 'kk_css');
 
-function sidebar_widget()
-{
-	register_sidebar_widget('KkConverter', 'kk_widget');
-	register_widget_control('KkConverter', 'kk_widget_control');
-}
-function kk_widget_control() {
-	echo "<p>".__("Жөндеу қажетсыз, автоматты түрде басқы бетте көрінеді.", "KkConverter")."</p>";
-} 
-// Functions to print widget in sidebar
-function kk_widget($args)
-{
-	extract($args);
-
-	$options = get_option("widget");
-	if (!is_array( $options ))
-	{
-		$options = array(
-		'style' => 'list'
-		);
-		update_option("widget", $options);
-	}
-
-	echo $before_widget;
-
-	if ( $options['style'] == "list" )
-        {
-		lang_links();
-	}
-	echo $after_widget;
-}
+require_once('inc/widgets.php');
 
 function lang_links()
 {
@@ -92,26 +47,28 @@ function lang_links()
 		if ( !$_GET['ln'] ) {
 			$kk = '<a href="http://'.$page_url.'&ln=kk">';
 			$arb = '<a href="http://'.$page_url.'&ln=ar">';
+			$lat = '<a href="http://'.$page_url.'&ln=lat">';
 		} else {
-			$kk = '<a href="http://'.str_replace( array("ln=ar", "ln=kk"), 'ln=kk', $page_url).'">';
-			$arb = '<a href="http://'.str_replace( array("ln=ar", "ln=kk"), 'ln=ar', $page_url).'">';
+			$kk = '<a href="http://'.str_replace( array("ln=ar", "ln=lat", "ln=kk"), 'ln=kk', $page_url).'">';
+			$arb = '<a href="http://'.str_replace( array("ln=ar", "ln=lat", "ln=kk"), 'ln=ar', $page_url).'">';
+			$lat = '<a href="http://'.str_replace( array("ln=ar", "ln=kk"), 'ln=lat', $page_url).'">';
 		}
 	}  else {
 		$kk = '<a href="?ln=kk">';
 		$arb = '<a href="?ln=ar">';
+		$lat = '<a href="?ln=lat">';
 	}
-	$oo1 = $oo2 = "</a>";
+	$cyr = $ar = $lt = "</a>";
 	
-	switch($lang) {
-		case "ar": $arb = "<strong>"; $oo1 = "</strong>"; break;
-		default:   $kk = "<strong>"; $oo2 = "</strong>";
-	}
 
 print <<<EOF
+	<style>.widget_kkconverter { text-align:center; } .widget_kkconverter ul li { width: auto; display:inline-block;}</style>
 <ul>
-<li>${kk}&#x041A;&#x0438;&#x0440;&#x0438;&#x043B;${oo2}</li>
+<li>${kk}&#x041A;&#x0438;&#x0440;&#x0438;&#x043B;${cyr}</li>
 &nbsp;&nbsp;&nbsp;
-<li>${arb}توتە${oo1}</li>
+<li>${arb}توتە${ar}</li>
+&nbsp;&nbsp;&nbsp;
+<li>${lat}Latin${lt}</li>
 </ul>
 EOF;
 }
@@ -120,16 +77,16 @@ class kk_convert
 {
 	function kk_convert()
 	{
-		add_action('wp_head', array(&$this,'buffer_start'));
-		add_action('wp_footer', array(&$this,'buffer_end'));
+		add_action('wp_head', array(&$this,'convert_start'));
+		add_action('wp_footer', array(&$this,'convert_end'));
 	}
 	
-	function buffer_start()
+	function convert_start()
 	{
 		ob_start( array(&$this,"do_convert") );
 	}
 	 
-	function buffer_end()
+	function convert_end()
 	{
 		ob_end_flush();
 	}
@@ -146,11 +103,12 @@ class kk_convert
 		{
 			$lang = $_COOKIE['lang'];
 		}
-		/**if ( $lang == "kk" )
+		if ( $lang == "lat" )
 		{
-			This function kkconvert.php file inside.
-			require_once(dirname(__FILE__)."/kkconvert.php");
-		}**/
+			$cyrl = array ("А", "Ә", "Б", "В", "Г", "Ғ", "Д", "Е", "Ж", "З", "И", "Й", "К", "Қ", "Л", "М","Н","Ң","О","Ө","П","Р","С","Т","У","Ұ","Ү","Ё","Ф","Х","Ц","Ч","Ш","Щ","Ъ","Ь","Һ","І","Ы","Э","Ю","Я","а", "ә", "б", "в", "г", "ғ", "д", "е", "ж", "з", "и", "й", "к", "қ", "л", "м","н","ң","о","ө","п","р","с","т","у","ұ","ү","ё","ф","х","ц","ч","ш","щ","ъ","ь","һ","і","ы","э","ю","я");
+			$latin = array ("A", "Ä", "B", "V", "G", "Ğ", "D", "E", "J", "Z", "I", "Y", "K", "Q", "L", "M","N","Ñ","O","Ö","P","R","S","T","U","W","Ü","E","F","H","C","Ç","Ş","Ş","'","'","H","İ","I","E","YU","YA","a", "ä", "b", "v", "g", "ğ", "d", "e", "j", "z", "i", "y", "k", "q", "l", "m","n","ñ","o","ö","p","r","s","t","u","w","ü","e","f","h","c","ç","ş","ş","'","'","h","i","ı","e","yu","ya");
+			return str_replace($cyrl, $latin, $text);
+		}
 		if ( $lang == "ar" )
 		{
 			// Cyrillic to Arabic
@@ -160,9 +118,9 @@ class kk_convert
 				'/н/ui' => 'ن', '/ң/ui' => 'ڭ', '/[оө]/ui' => 'و', '/п/ui' => 'پ', '/р/ui' => 'ر', '/с/ui' => 'س', '/т/ui' => 'ت',
 				'/у/ui' => 'ۋ', '/[ұү]/ui' => 'ۇ', '/ф/ui' => 'ف', '/х/ui' => 'ح', '/һ/ui' => 'ھ', '/ц/ui' => 'تس', '/ч/ui' => 'چ',
 				'/ш/ui' => 'ش', '/[ыі]/ui' => 'ى', '/ё/ui' => 'يو', '/ю/ui' => 'يۋ', '/я/ui' => 'يا', '/щ/ui' => 'شش',
-				'/[ъь]/ui' => '', '/\,/' => '،', '/џ/ui' => 'ۇ', '/يي/ui' => 'ي', '/ۇلى/ui' => ' ۇلى', '/ششش/ui' => 'شش', '/ۋۋ/ui' => 'ۋ',
+				'/[ъь]/ui' => '', '/џ/ui' => 'ۇ', '/يي/ui' => 'ي', '/ششش/ui' => 'شش', '/ۋۋ/ui' => 'ۋ',
 				// symbol conversion between a-z0-9. [ ؟ -> ? ]
-				'/\?/' => '؟', '/([A-Za-z0-9"\/])؟/' => '$1?',
+				//'/\?/' => '؟', '/([A-Za-z0-9"\/])؟/' => '$1?', '/\,/' => '،',
 			);
 			// The next control HAMZA [ ء ]
 			$matches = preg_split( '/[\b\s\-\.:,>«]+/', $text, -1, PREG_SPLIT_OFFSET_CAPTURE);
@@ -186,12 +144,11 @@ class kk_convert
 			// Arabic text results
 			return $text;
 		   } else {
-		   	   // if there no need for transliteration, print out unchanged text
 			return $text;
 		}
 	}
 }
 
-$_wp_kk_convert =& new kk_convert;
+new kk_convert;
 
 ?>
