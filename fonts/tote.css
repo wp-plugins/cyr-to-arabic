@@ -13,4 +13,4 @@ html,body,div,p,a,ul,ol,li,h1,h2,h3,h4,h5,h6,pre,form,button,select,table,td,tr,
 font-family:'KazNet';
 font-family:'KazNet' !important;
 }
-html,body,p{}
+html, p {direction:rtl}

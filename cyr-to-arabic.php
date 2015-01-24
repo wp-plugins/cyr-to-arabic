@@ -120,24 +120,24 @@ class kk_convert
 				'/ш/ui' => 'ش', '/[ыі]/ui' => 'ى', '/ё/ui' => 'يو', '/ю/ui' => 'يۋ', '/я/ui' => 'يا', '/щ/ui' => 'شش',
 				'/[ъь]/ui' => '', '/џ/ui' => 'ۇ', '/يي/ui' => 'ي', '/ششش/ui' => 'شش', '/ۋۋ/ui' => 'ۋ',
 				// symbol conversion between a-z0-9. [ ؟ -> ? ]
-				//'/\?/' => '؟', '/([A-Za-z0-9"\/])؟/' => '$1?', '/\,/' => '،',
+				'/\?/' => '؟', '/([A-Za-z0-9\'\-\"\)\>\*\$\|\+\/])؟/' => '$1?', '/\,/' => '،', '/([A-Za-z0-9\'\-\"\)\>\*\$\|\+\/])،/' => '$1,',
 			);
 			// The next control HAMZA [ ء ]
-			$matches = preg_split( '/[\b\s\-\.:,>«]+/', $text, -1, PREG_SPLIT_OFFSET_CAPTURE);
-			$mstart = 0;
-			$ret = '';
-			foreach( $matches as $m ) {
-				$ret .= substr( $text, $mstart, $m[1] - $mstart );
+			$matche = preg_split( '/[\b\s\-\.:,>«]+/', $text, -1, PREG_SPLIT_OFFSET_CAPTURE);
+			$start = 0;
+			$res = '';
+			foreach( $matche as $m ) {
+				$res .= substr( $text, $start, $m[1] - $start );
 				if ( preg_match('/[әөүіӘӨҮІ]/u', $m[0]) && !preg_match('/[еэгғкқЕЭГҒКҚ]/u', $m[0]) )
 				{
-					$ret .= 'ء'.$m[0];
+					$res .= 'ء'.$m[0];
 				} else {
-					$ret .= $m[0];
+					$res .= $m[0];
 				}
-				$mstart = $m[1] + strlen($m[0]);
+				$start = $m[1] + strlen($m[0]);
 			}
 			// Convert Text
-			$text =& $ret;
+			$text =& $res;
 			foreach( $arb as $k => $v ) {
 				$text = preg_replace( $k, $v, $text );
 			}
