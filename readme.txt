@@ -1,7 +1,7 @@
 ﻿=== cyr-to-arabic ===
 Contributors: janibek sheryazdan
 Tags: converter, convert, transliteration, translation, translate, translit, plugin, kazakh, cyrillic, arabic, قازاقشا, script, multilanguage
-Donate link: http://janibek.kz
+Donate link: https://profiles.wordpress.org/janibek7
 Requires at least: 3.0
 Tested up to: 4.1
 Stable tag: 0.5
